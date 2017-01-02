@@ -1,5 +1,5 @@
 #fileClient.py
-
+import os
 import socket
 import struct
 
@@ -62,15 +62,28 @@ def main():
 		fileList.append(fileItr[4:])
 		fileItr = recv_message(s).decode("utf8")
 	
+	print("Press a to send file else:")
 	filename = input("Choose file letter ->")
 	send_message(s,filename.encode("utf8"))
-	data = recv_message(s)
-	if(data.decode("utf8")[:2] == "OK"):
-		print("Starting Download")
-		recv_file(s,fileList[ord(filename)-97])
-		print("Download Complete!")
+	if(filename == "a"):
+		print("Choose file to send")
+		fileList = os.listdir(os.path.dirname(os.path.realpath(__file__)))
+		count = 0;
+		for f in fileList:
+			print(str(chr(count+97)),":",f)
+			count += 1
+		choice = input()
+		print("Sending",fileList[ord(choice)-97],".")
+		send_file(s,fileList[ord(choice)-97])
+		print("Upload complete")
 	else:
-		print("Server Response: Not OK to download file")
+		data = recv_message(s)
+		if(data.decode("utf8")[:2] == "OK"):
+			print("Starting Download")
+			recv_file(s,fileList[ord(filename)-97])
+			print("Download Complete!")
+		else:
+			print("Server Response: Not OK to download file")
 
 			
 if __name__ == "__main__":
